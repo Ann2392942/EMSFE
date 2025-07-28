@@ -1,0 +1,284 @@
+<!-- src/app/components/organizer/dashboard/dashboard.component.html -->
+<div class="dashboard-container">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <div class="welcome-text">
+        <h1>Welcome back, {{ currentUser?.email?.split('@')[0] || 'Admin' }}! 👋</h1>
+        <p>Here's what's happening with your events today - {{ currentDate | date:'fullDate' }}</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn btn-primary" (click)="createEvent()">
+          <i class="bi bi-plus-circle me-2"></i>Create Event
+        </button>
+        <button class="btn btn-outline-primary" (click)="refreshDashboard()">
+          <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="text-center py-5" *ngIf="isLoading">
+    <div class="spinner-border text-primary mb-3" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted">Loading dashboard data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="alert alert-danger d-flex align-items-center" *ngIf="errorMessage">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading">
+    <!-- Key Metrics Cards -->
+    <div class="metrics-section mb-4">
+      <h5 class="section-title">
+        <i class="bi bi-graph-up me-2"></i>Key Metrics
+      </h5>
+      <div class="row g-3">
+        <div class="col-lg-3 col-md-6">
+          <div class="metric-card total-events">
+            <div class="metric-icon">
+              <i class="bi bi-calendar3"></i>
+            </div>
+            <div class="metric-content">
+              <div class="metric-value">{{ stats.totalEvents }}</div>
+              <div class="metric-label">Total Events</div>
+              <div class="metric-trend">
+                <span class="trend-up">+{{ analytics.growthPercentage }}%</span> this month
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <div class="metric-card active-events">
+            <div class="metric-icon">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="metric-content">
+              <div class="metric-value">{{ stats.activeEvents }}</div>
+              <div class="metric-label">Active Events</div>
+              <div class="metric-trend">
+                <span class="trend-neutral">{{ stats.upcomingEvents }}</span> upcoming
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <div class="metric-card revenue">
+            <div class="metric-icon">
+              <i class="bi bi-currency-rupee"></i>
+            </div>
+            <div class="metric-content">
+              <div class="metric-value"> ₹{{ stats.revenueThisMonth | number:'1.0-0' }}</div>
+              <div class="metric-label">Revenue (This Month)</div>
+              <div class="metric-trend">
+                <span class="trend-up">Avg:  ₹{{ analytics.avgTicketPrice | number:'1.0-0' }}</span> per ticket
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <div class="metric-card bookings">
+            <div class="metric-icon">
+              <i class="bi bi-people"></i>
+            </div>
+            <div class="metric-content">
+              <div class="metric-value">{{ stats.totalBookings | number }}</div>
+              <div class="metric-label">Total Bookings</div>
+              <div class="metric-trend">
+                <span class="trend-neutral">{{ stats.totalCapacity | number }}</span> total capacity
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-4">
+        <div class="quick-stats-card">
+          <h6><i class="bi bi-bar-chart me-2"></i>Quick Stats</h6>
+          <div class="stats-grid">
+            <div class="stat-item" (click)="navigateToLocations()">
+              <div class="stat-number">{{ stats.totalLocations }}</div>
+              <div class="stat-text">Locations</div>
+            </div>
+            <div class="stat-item" (click)="navigateToCategories()">
+              <div class="stat-number">{{ stats.totalCategories }}</div>
+              <div class="stat-text">Categories</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">{{ stats.avgEventDuration }}</div>
+              <div class="stat-text">Avg Days</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">{{ stats.draftEvents }}</div>
+              <div class="stat-text">Drafts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="analytics-card">
+          <div class="card-header">
+            <h6><i class="bi bi-graph-up me-2"></i>Event Analytics</h6>
+          </div>
+          <div class="analytics-content">
+            <div class="analytics-item">
+              <div class="analytics-icon popular">
+                <i class="bi bi-trophy"></i>
+              </div>
+              <div>
+                <div class="analytics-label">Most Popular Category</div>
+                <div class="analytics-value">{{ analytics.popularCategory }}</div>
+              </div>
+            </div>
+            <div class="analytics-item">
+              <div class="analytics-icon location">
+                <i class="bi bi-geo-alt"></i>
+              </div>
+              <div>
+                <div class="analytics-label">Most Used Location</div>
+                <div class="analytics-value">{{ analytics.popularLocation }}</div>
+              </div>
+            </div>
+            <div class="analytics-item">
+              <div class="analytics-icon growth">
+                <i class="bi bi-graph-up-arrow"></i>
+              </div>
+              <div>
+                <div class="analytics-label">Monthly Growth</div>
+                <div class="analytics-value" [ngClass]="analytics.growthPercentage >= 0 ? 'text-success' : 'text-danger'">
+                  {{ analytics.growthPercentage >= 0 ? '+' : '' }}{{ analytics.growthPercentage }}%
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-4 mb-4">
+      <!-- Category Distribution -->
+      <div class="col-lg-4">
+        <div class="chart-card">
+          <div class="card-header">
+            <h6><i class="bi bi-pie-chart me-2"></i>Category Distribution</h6>
+          </div>
+          <div class="chart-content">
+            <div class="category-chart">
+              <div class="category-item" *ngFor="let category of categoryDistribution">
+                <div class="category-info">
+                  <div class="category-color" [style.backgroundColor]="category.color"></div>
+                  <span class="category-name">{{ category.name }}</span>
+                </div>
+                <div class="category-stats">
+                  <span class="category-count">{{ category.count }}</span>
+                  <span class="category-percentage">{{ category.percentage }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="col-lg-8">
+        <div class="activity-card">
+          <div class="card-header">
+            <h6><i class="bi bi-clock-history me-2"></i>Recent Activity</h6>
+          </div>
+          <div class="activity-content">
+            <div class="activity-item" *ngFor="let activity of recentActivities">
+              <div class="activity-icon" [ngClass]="getActivityClass(activity.color)">
+                <i [ngClass]="activity.icon"></i>
+              </div>
+              <div class="activity-details">
+                <div class="activity-title">{{ activity.title }}</div>
+                <div class="activity-meta">
+                  <span class="activity-type">{{ getCapitalizedText(activity.type) }}</span>
+                  <span class="activity-action">{{ getCapitalizedText(activity.action) }}</span>
+                  <span class="activity-date">{{ formatDate(activity.date) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-center mt-3" *ngIf="recentActivities.length === 0">
+              <small class="text-muted">No recent activities</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="upcoming-events-section">
+      <div class="section-header">
+        <h5 class="section-title">
+          <i class="bi bi-calendar-week me-2"></i>Upcoming Events
+        </h5>
+        <button class="btn btn-sm btn-outline-primary" (click)="navigateToEvents()">
+          View All Events <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+      </div>
+
+      <div class="upcoming-events-grid" *ngIf="upcomingEventsList.length > 0">
+        <div class="event-card" *ngFor="let event of upcomingEventsList" (click)="viewEvent(event.eventID)">
+          <div class="event-header">
+            <div class="event-date">
+              <div class="event-day">{{ getEventDay(event.startDate) }}</div>
+              <div class="event-month">{{ getEventMonth(event.startDate) }}</div>
+            </div>
+            <div class="event-status">
+              <span class="badge" [ngClass]="getBadgeClass(getEventStatus(event))">
+                {{ getEventStatus(event) }}
+              </span>
+            </div>
+          </div>
+          <div class="event-content">
+            <h6 class="event-name">{{ event.name }}</h6>
+            <div class="event-details">
+              <div class="event-detail">
+                <i class="bi bi-geo-alt"></i>
+                <span>{{ getLocationName(event.locationID) }}</span>
+              </div>
+              <div class="event-detail">
+                <i class="bi bi-people"></i>
+                <span>{{ event.bookedCapacity }}/{{ getLocationCapacity(event.locationID) }} booked</span>
+              </div>
+              <div class="event-detail" *ngIf="event.isPrice">
+                <i class="bi bi-currency-dollar"></i>
+                <span>${{ event.price | number:'1.2-2' }}</span>
+              </div>
+              <div class="event-detail" *ngIf="!event.isPrice">
+                <i class="bi bi-gift"></i>
+                <span>Free Event</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="upcomingEventsList.length === 0">
+        <div class="empty-icon">
+          <i class="bi bi-calendar-x"></i>
+        </div>
+        <h6>No Upcoming Events</h6>
+        <p>Create your first event to get started!</p>
+        <button class="btn btn-primary" (click)="createEvent()">
+          <i class="bi bi-plus-circle me-2"></i>Create Event
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

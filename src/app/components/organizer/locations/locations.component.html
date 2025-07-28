@@ -1,0 +1,233 @@
+<!-- src/app/components/organizer/locations/locations.component.html -->
+<div class="locations-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1><i class="bi bi-geo-alt me-2"></i>Locations Management</h1>
+      <p>Manage venues and locations for your events</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="createLocation()">
+        <i class="bi bi-plus-circle me-2"></i>Add Location
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards with Bootstrap -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body d-flex align-items-center">
+          <div class="stat-icon total me-3">
+            <i class="bi bi-geo-alt"></i>
+          </div>
+          <div>
+            <h3 class="mb-0 fw-bold">{{ totalLocations }}</h3>
+            <p class="text-muted mb-0 small">Total Locations</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body d-flex align-items-center">
+          <div class="stat-icon average me-3">
+            <i class="bi bi-people"></i>
+          </div>
+          <div>
+            <h3 class="mb-0 fw-bold">{{ averageCapacity | number }}</h3>
+            <p class="text-muted mb-0 small">Avg Capacity</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body d-flex align-items-center">
+          <div class="stat-icon largest me-3">
+            <i class="bi bi-building"></i>
+          </div>
+          <div>
+            <h3 class="mb-0 fw-bold">{{ largestVenue?.capacity | number }}</h3>
+            <p class="text-muted mb-0 small">Largest Venue</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body d-flex align-items-center">
+          <div class="stat-icon filtered me-3">
+            <i class="bi bi-funnel"></i>
+          </div>
+          <div>
+            <h3 class="mb-0 fw-bold">{{ locationCount }}</h3>
+            <p class="text-muted mb-0 small">Filtered Results</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="alert alert-danger d-flex align-items-center" *ngIf="errorMessage">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Filters Section -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-8">
+          <div class="input-group">
+            <!-- <span class="input-group-text bg-white border-end-0">
+              <i class="bi bi-search"></i>
+            </span> -->
+            <input
+              type="text"
+              class="form-control border-start-1"
+              placeholder="Search locations, cities, addresses..."
+              [(ngModel)]="searchTerm"
+              (input)="onFilterChange()">
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <select class="form-select" [(ngModel)]="selectedCapacityRange" (change)="onFilterChange()">
+            <option value="all">All Capacities</option>
+            <option value="small">Small (< 100)</option>
+            <option value="medium">Medium (100-499)</option>
+            <option value="large">Large (500-999)</option>
+            <option value="xlarge">Extra Large (1000+)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-2">
+        <small class="text-muted">
+          <i class="bi bi-info-circle me-1"></i>
+          {{ locationCount }} {{ locationCount === 1 ? 'location' : 'locations' }} found
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Locations List -->
+  <div class="locations-section">
+    <!-- Loading State -->
+    <div class="text-center py-5" *ngIf="isLoading">
+      <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted">Loading locations...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="text-center py-5" *ngIf="!isLoading && filteredLocations.length === 0">
+      <div class="mb-3" style="font-size: 4rem; color: #e9ecef;">
+        <i class="bi bi-geo-alt-slash"></i>
+      </div>
+      <h3 class="fw-bold mb-2">{{ locations.length === 0 ? 'No Locations Created' : 'No Locations Found' }}</h3>
+      <p class="text-muted mb-4">{{ locations.length === 0 ? 'Get started by adding your first venue location.' : 'Try adjusting your filters to see more locations.' }}</p>
+      <button class="btn btn-primary" (click)="createLocation()" *ngIf="locations.length === 0">
+        <i class="bi bi-plus-circle me-2"></i>Add First Location
+      </button>
+    </div>
+
+    <!-- Locations Bootstrap Cards -->
+    <div class="row g-4" *ngIf="!isLoading && filteredLocations.length > 0">
+      <div class="col-lg-6 col-xl-4" *ngFor="let location of filteredLocations; trackBy: trackByLocation">
+        <div class="card h-100 border-0 shadow-sm location-card">
+          <!-- Card Header -->
+          <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-start p-3">
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="badge" [ngClass]="'bg-' + getCapacityCategoryColor(location.capacity)">
+                <i class="bi bi-people me-1"></i>
+                {{ getCapacityCategory(location.capacity) }}
+              </span>
+              <!-- <span class="badge bg-secondary">
+                ID: {{ location.locationID }}
+              </span> -->
+            </div>
+
+            <div class="dropdown">
+              <!-- <button class="btn btn-link btn-sm text-muted" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots"></i>
+              </button> -->
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <button class="dropdown-item" (click)="viewLocation(location.locationID)">
+                    <i class="bi bi-eye me-2"></i>View Details
+                  </button>
+                </li>
+                <li>
+                  <button class="dropdown-item" (click)="editLocation(location.locationID)">
+                    <i class="bi bi-pencil me-2"></i>Edit Location
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body p-3 pt-0">
+            <h5 class="card-title fw-bold mb-3">{{ location.locationName }}</h5>
+
+            <!-- Capacity Display -->
+            <div class="capacity-display mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small text-muted">Capacity</span>
+                <span class="fw-bold text-primary">{{ location.capacity | number }}</span>
+              </div>
+              <div class="progress" style="height: 6px;">
+                <div class="progress-bar bg-primary"
+                     [style.width.%]="(location.capacity / 2000) * 100">
+                </div>
+              </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="mb-3">
+              <div class="d-flex align-items-start mb-2 text-muted">
+                <i class="bi bi-geo-alt me-2 mt-1"></i>
+                <div class="small">
+                  <div>{{ location.address }}</div>
+                  <div>{{ location.city }}, {{ location.state }}</div>
+                  <div>{{ location.country }} - {{ location.postalCode }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="contact-info">
+              <div class="d-flex align-items-center mb-1 small">
+                <i class="bi bi-telephone-fill text-success me-2"></i>
+                <span class="fw-semibold">{{ location.primaryContact }}</span>
+              </div>
+              <div class="d-flex align-items-center small" *ngIf="location.secondaryContact">
+                <i class="bi bi-telephone text-info me-2"></i>
+                <span>{{ location.secondaryContact }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="card-footer bg-transparent border-0 p-3">
+            <div class="d-grid gap-2 d-md-flex">
+              <button class="btn btn-outline-primary btn-sm flex-fill" (click)="viewLocation(location.locationID)">
+                <i class="bi bi-eye me-1"></i>View
+              </button>
+              <button class="btn btn-primary btn-sm flex-fill" (click)="editLocation(location.locationID)">
+                <i class="bi bi-pencil me-1"></i>Edit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

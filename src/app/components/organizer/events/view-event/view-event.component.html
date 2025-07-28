@@ -1,0 +1,405 @@
+<!-- src/app/components/organizer/events/view-event/view-event.component.html -->
+<div class="container py-4">
+  <!-- Back Button -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <button class="btn btn-outline-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Events
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="row" *ngIf="isLoading">
+    <div class="col-12">
+      <div class="text-center py-5">
+        <div class="spinner-border text-success mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5>Loading event details...</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="row" *ngIf="errorMessage">
+    <div class="col-12">
+      <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {{ errorMessage }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Details -->
+  <div *ngIf="event && !isLoading && !errorMessage">
+    <!-- Enhanced Event Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card bg-success text-white">
+          <div class="card-body py-5">
+            <div class="row">
+              <div class="col-lg-8">
+                <div class="d-flex align-items-center mb-3">
+                  <span class="badge bg-light text-dark fs-6 px-3 py-2 me-3">
+                    <i class="bi bi-calendar-check me-2"></i>
+                    {{ getEventStatus() }}
+                  </span>
+                  <span class="badge bg-warning text-dark px-3 py-2" *ngIf="event.isPrice">
+                    <i class="bi bi-currency-rupee me-1"></i>
+                    ₹{{ event.price }} per ticket
+                  </span>
+                  <span class="badge bg-info text-dark px-3 py-2" *ngIf="!event.isPrice">
+                    <i class="bi bi-gift me-1"></i>
+                    Free Event
+                  </span>
+                </div>
+
+                <h1 class="display-5 fw-bold">{{ event.name }}</h1>
+                <p class="lead">{{ event.description }}</p>
+
+                <!-- Enhanced Event Info -->
+                <div class="row mt-4">
+                  <div class="col-md-3 mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-calendar3 fs-4 me-3"></i>
+                      <div>
+                        <div class="fw-semibold">Start Date</div>
+                        <small class="opacity-75">{{ formatDate(event.startDate) }}</small>
+                        <small class="opacity-75 d-block">{{ formatTime(event.startDate) }}</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-calendar-check fs-4 me-3"></i>
+                      <div>
+                        <div class="fw-semibold">End Date</div>
+                        <small class="opacity-75">{{ formatDate(event.endDate) }}</small>
+                        <small class="opacity-75 d-block">{{ formatTime(event.endDate) }}</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-geo-alt fs-4 me-3"></i>
+                      <div>
+                        <div class="fw-semibold">{{ location?.locationName || 'Unknown' }}</div>
+                        <small class="opacity-75">{{ location?.city }}, {{ location?.state }}</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-tag fs-4 me-3"></i>
+                      <div>
+                        <div class="fw-semibold">{{ category?.categoryName || 'Unknown' }}</div>
+                        <small class="opacity-75">Category</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Event Analytics -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="row g-4">
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card text-center h-100">
+              <div class="card-body">
+                <i class="bi bi-people fs-1 text-primary mb-3"></i>
+                <h4 class="text-primary">{{ event.bookedCapacity }}</h4>
+                <p class="text-muted mb-0 small">Total Bookings</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card text-center h-100">
+              <div class="card-body">
+                <i class="bi bi-ticket fs-1 text-success mb-3"></i>
+                <h4 class="text-success">{{ getAvailableSpots() }}</h4>
+                <p class="text-muted mb-0 small">Available Spots</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card text-center h-100">
+              <div class="card-body">
+                <i class="bi bi-percent fs-1 text-info mb-3"></i>
+                <h4 class="text-info">{{ getBookingPercentage() }}%</h4>
+                <p class="text-muted mb-0 small">Booking Rate</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card text-center h-100">
+              <div class="card-body">
+                <i class="bi bi-building fs-1 text-warning mb-3"></i>
+                <h4 class="text-warning">{{ location?.capacity || 0 }}</h4>
+                <p class="text-muted mb-0 small">Total Capacity</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card text-center h-100">
+              <div class="card-body">
+                <i class="bi bi-chat-quote fs-1 text-purple mb-3"></i>
+                <h4 class="text-purple">{{ feedbacks.length }}</h4>
+                <p class="text-muted mb-0 small">Total Reviews</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="card text-center h-100">
+              <div class="card-body">
+                <i class="bi bi-currency-rupee fs-1 text-success mb-3"></i>
+                <h4 class="text-success" *ngIf="event.isPrice">${{ getTotalRevenue() }}</h4>
+                <h4 class="text-success" *ngIf="!event.isPrice">$0</h4>
+                <p class="text-muted mb-0 small">Total Revenue</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Duration & Revenue Details -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5><i class="bi bi-clock me-2"></i>Event Duration</h5>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-4">
+                <h4 class="text-primary">{{ getEventDurationDays() }}</h4>
+                <small class="text-muted">Days</small>
+              </div>
+              <div class="col-4">
+                <h4 class="text-success">{{ getEventDurationHours() }}</h4>
+                <small class="text-muted">Hours</small>
+              </div>
+              <div class="col-4">
+                <h4 class="text-info">{{ getDaysUntilEvent() }}</h4>
+                <small class="text-muted">Days {{ getDaysUntilEvent() < 0 ? 'Ago' : 'Until' }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5><i class="bi bi-graph-up me-2"></i>Revenue Analysis</h5>
+          </div>
+          <div class="card-body">
+            <div class="row text-center" *ngIf="event.isPrice">
+              <div class="col-4">
+                <h4 class="text-success"> ₹{{ event.price }}</h4>
+                <small class="text-muted">Price/Ticket</small>
+              </div>
+              <div class="col-4">
+                <h4 class="text-primary"> ₹{{ getTotalRevenue() }}</h4>
+                <small class="text-muted">Total Revenue</small>
+              </div>
+              <div class="col-4">
+                <h4 class="text-warning"> ₹ {{ getPotentialRevenue() }}</h4>
+                <small class="text-muted">Potential Max</small>
+              </div>
+            </div>
+            <div class="text-center" *ngIf="!event.isPrice">
+              <i class="bi bi-gift fs-1 text-success mb-3"></i>
+              <h5 class="text-success">Free Event</h5>
+              <p class="text-muted mb-0">No revenue tracking for free events</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Details -->
+   <!-- Location Details -->
+<div class="row mb-4" *ngIf="location">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5><i class="bi bi-geo-alt me-2"></i>Venue Information</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-8">
+            <h6 class="fw-bold">{{ location.locationName }}</h6>
+            <p class="mb-2">
+              <i class="bi bi-building me-2 text-muted"></i>
+              {{ location.address }}
+            </p>
+            <p class="mb-0">
+              <i class="bi bi-geo me-2 text-muted"></i>
+              {{ location.city }}, {{ location.state }}
+            </p>
+          </div>
+          <div class="col-md-4 text-end">
+            <div class="venue-capacity">
+              <div class="capacity-circle">
+                <div class="capacity-number">{{ location.capacity }}</div>
+                <div class="capacity-label">Max Capacity</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Feedback Section -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h4>
+                <i class="bi bi-chat-quote me-2"></i>
+                Event Reviews & Feedback
+              </h4>
+              <div class="rating-summary" *ngIf="feedbacks.length > 0">
+                <div class="average-rating">
+                  <span class="rating-value">{{ getAverageRating() }}</span>
+                  <div class="stars">
+                    <i *ngFor="let star of getDisplayStars(getAverageRating())" [class]="star"></i>
+                  </div>
+                  <small class="text-muted">({{ feedbacks.length }} review{{ feedbacks.length !== 1 ? 's' : '' }})</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body p-4">
+
+            <!-- Rating Breakdown -->
+            <div class="rating-breakdown mb-5" *ngIf="feedbacks.length > 0">
+              <h5 class="mb-4">Rating Breakdown</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="rating-bars">
+                    <div class="rating-bar mb-3" *ngFor="let item of [
+                      {stars: 5, label: 'Excellent', count: getFeedbackStats().excellent},
+                      {stars: 4, label: 'Good', count: getFeedbackStats().good},
+                      {stars: 3, label: 'Average', count: getFeedbackStats().average},
+                      {stars: 2, label: 'Poor', count: getFeedbackStats().poor},
+                      {stars: 1, label: 'Terrible', count: getFeedbackStats().terrible}
+                    ]">
+                      <div class="d-flex align-items-center justify-content-between mb-1">
+                        <div class="d-flex align-items-center">
+                          <span class="me-2">{{ item.stars }}</span>
+                          <i class="bi bi-star-fill text-warning"></i>
+                          <span class="ms-2">{{ item.label }}</span>
+                        </div>
+                        <div class="text-end">
+                          <span class="badge bg-light text-dark">{{ item.count }}</span>
+                          <small class="text-muted ms-1">({{ getRatingPercentage(item.count) }}%)</small>
+                        </div>
+                      </div>
+                      <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-warning" [style.width.%]="getRatingPercentage(item.count)"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="text-center">
+                    <div class="rating-circle mb-3">
+                      <div class="rating-number">{{ getAverageRating() }}</div>
+                      <div class="rating-label">Average Rating</div>
+                    </div>
+                    <div class="stars-large mb-2">
+                      <i *ngFor="let star of getDisplayStars(getAverageRating())" [class]="star"></i>
+                    </div>
+                    <p class="text-muted">Based on {{ feedbacks.length }} review{{ feedbacks.length !== 1 ? 's' : '' }}</p>
+
+                    <!-- Feedback Participation Rate -->
+                    <div class="mt-3">
+                      <small class="text-muted">Feedback Rate: </small>
+                      <span class="badge bg-info">{{ getFeedbackParticipationRate() }}%</span>
+                      <br>
+                      <small class="text-muted">{{ feedbacks.length }} reviews from {{ event.bookedCapacity }} attendees</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div class="alert alert-danger border-0" *ngIf="feedbackError">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ feedbackError }}
+            </div>
+
+            <!-- Loading -->
+            <div class="text-center py-5" *ngIf="loadingFeedbacks">
+              <div class="spinner-border text-success mb-3"></div>
+              <p class="text-muted">Loading reviews...</p>
+            </div>
+
+            <!-- Feedback List -->
+            <div class="feedback-list" *ngIf="!loadingFeedbacks">
+              <!-- No Feedback -->
+              <div class="no-feedback text-center py-5" *ngIf="feedbacks.length === 0">
+                <i class="bi bi-chat-quote display-1 text-muted mb-3"></i>
+                <h5 class="text-muted">No Reviews Yet</h5>
+                <p class="text-muted">This event hasn't received any reviews from attendees yet.</p>
+              </div>
+
+              <!-- Feedback Cards -->
+              <div class="feedback-item mb-3" *ngFor="let feedback of feedbacks">
+                <div class="card border-0 shadow-sm">
+                  <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                      <div class="reviewer-info d-flex align-items-center">
+                        <div class="avatar-circle me-3">
+                          <i class="bi bi-person-fill"></i>
+                        </div>
+                        <div>
+                          <h6 class="mb-1 fw-semibold">{{ feedback.userName }}</h6>
+                          <small class="text-muted">{{ formatFeedbackDate(feedback.submittedTimestamp) }}</small>
+                        </div>
+                      </div>
+                      <div class="rating-display">
+                        <div class="stars mb-1">
+                          <i *ngFor="let star of getDisplayStars(feedback.rating)" [class]="star"></i>
+                        </div>
+                        <small class="text-muted text-center d-block">{{ feedback.rating }}/5</small>
+                      </div>
+                    </div>
+
+                    <div class="feedback-comment">
+                      <p class="mb-0 lh-base">{{ feedback.comments }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

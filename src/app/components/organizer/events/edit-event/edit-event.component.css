@@ -1,0 +1,148 @@
+/* src/app/components/organizer/events/edit-event/edit-event.component.css */
+
+.edit-event-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Form Enhancement */
+.form-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
+
+/* Card Enhancements */
+.card {
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+}
+
+.card-header h5 {
+  color: #374151;
+  font-weight: 600;
+}
+
+.card-header i {
+  color: #6366f1;
+}
+
+/* Alert Customizations */
+.alert-info {
+  background-color: #f0f9ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.alert-warning {
+  background-color: #fffbeb;
+  border-color: #fed7aa;
+  color: #92400e;
+}
+
+/* Button Enhancements */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
+
+.btn-primary:hover {
+  background-color: #5856eb;
+  border-color: #5856eb;
+  transform: translateY(-1px);
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6b7280;
+  border-color: #6b7280;
+}
+
+.btn-outline-info:hover {
+  background-color: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+/* Input Group Enhancements */
+.input-group-text {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .edit-event-container {
+    margin: 0 16px;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .d-flex.gap-2 {
+    flex-direction: column;
+  }
+
+  .d-flex.gap-2 .btn {
+    width: 100%;
+  }
+}
+
+/* Loading and Error States */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.text-muted {
+  color: #6b7280 !important;
+}
+
+/* Badge Customizations */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+}
+
+.bg-secondary {
+  background-color: #6b7280 !important;
+}
+
+/* Character Counter */
+.small.text-muted {
+  font-size: 0.875rem;
+}
+
+/* Invalid Feedback Enhancements */
+.invalid-feedback {
+  font-size: 0.875rem;
+}
+
+.invalid-feedback div {
+  margin-bottom: 0.25rem;
+}
+
+.invalid-feedback div:last-child {
+  margin-bottom: 0;
+}

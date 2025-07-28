@@ -1,0 +1,120 @@
+/* src/app/components/user/notifications/notifications.component.css */
+
+.bg-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.card {
+  border-radius: 12px;
+  border: none;
+}
+
+.notifications-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notification-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 20px;
+  border-bottom: 1px solid #f1f3f4;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.notification-card:hover {
+  background: #f8f9fa;
+}
+
+.notification-card:last-child {
+  border-bottom: none;
+}
+
+.notification-card.notification-success {
+  border-left: 4px solid #10b981;
+}
+
+.notification-card.notification-danger {
+  border-left: 4px solid #ef4444;
+}
+
+.notification-card.notification-info {
+  border-left: 4px solid #3b82f6;
+}
+
+.notification-icon-wrapper {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-message {
+  font-size: 1rem;
+  color: #374151;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.notification-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-time {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.notification-date {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.notification-actions {
+  flex-shrink: 0;
+}
+
+.empty-state {
+  background: white;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .notification-card {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .notification-icon-wrapper {
+    width: 35px;
+    height: 35px;
+    font-size: 1.1rem;
+  }
+
+  .notification-message {
+    font-size: 0.9rem;
+  }
+}

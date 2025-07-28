@@ -1,0 +1,259 @@
+<!-- src/app/components/user/tickets/view-ticket/view-ticket.component.html -->
+<div class="container py-4">
+  <!-- Back Button -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <button class="btn btn-outline-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Tickets
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="row" *ngIf="loading">
+    <div class="col-12">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary mb-3"></div>
+        <h5>Loading ticket details...</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="row" *ngIf="error">
+    <div class="col-12">
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Details -->
+  <div class="row" *ngIf="ticket && !loading && !error">
+    <div class="col-lg-10 mx-auto">
+
+      <!-- Digital Ticket -->
+      <div class="digital-ticket" [ngClass]="getStatusClass()">
+
+        <!-- Ticket Header -->
+        <div class="ticket-header">
+          <div class="header-left">
+            <div class="ticket-logo">
+              <i class="bi bi-ticket-perforated"></i>
+              <span class="logo-text">EventHub</span>
+            </div>
+            <!-- <div class="ticket-id">
+              <span class="id-label">Ticket ID</span>
+              <span class="id-value">#{{ ticket.ticketID }}</span>
+            </div> -->
+          </div>
+          <div class="ticket-status-badge">
+            <i [class]="getStatusIcon()"></i>
+            <span class="status-text">{{ ticket.status }}</span>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="ticket-main">
+          <div class="row g-4">
+            <!-- Left Column - Event Details -->
+            <div class="col-lg-8">
+              <!-- Event Title Section -->
+              <div class="event-title-section">
+                <h1 class="event-title">{{ ticket.eventName }}</h1>
+                <div class="event-meta">
+                  <span class="category-badge">
+                    <i class="bi bi-tag-fill me-1"></i>
+                    {{ ticket.categoryName }}
+                  </span>
+                  <span class="price-badge" *ngIf="ticket.isEventPaid">
+                    <i class="bi bi-currency-rupee me-1"></i>
+                    ₹{{ ticket.eventPrice }} per person
+                  </span>
+                  <span class="price-badge free-badge" *ngIf="!ticket.isEventPaid">
+                    <i class="bi bi-gift me-1"></i>
+                    Free Event
+                  </span>
+                </div>
+              </div>
+
+              <!-- Event Description -->
+              <div class="event-description">
+                <h5><i class="bi bi-info-circle me-2"></i>About This Event</h5>
+                <p>{{ ticket.eventDescription }}</p>
+              </div>
+
+              <!-- Event Details Grid -->
+              <div class="details-section">
+                <h5><i class="bi bi-calendar-event me-2"></i>Event Details</h5>
+                <div class="details-grid">
+
+                  <div class="detail-card">
+                    <div class="detail-icon bg-primary">
+                      <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div class="detail-content">
+                      <div class="detail-label">Start Date & Time</div>
+                      <div class="detail-value">{{ formatFullDate(ticket.eventStartDate) }}</div>
+                    </div>
+                  </div>
+
+                  <div class="detail-card">
+                    <div class="detail-icon bg-success">
+                      <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <div class="detail-content">
+                      <div class="detail-label">End Date & Time</div>
+                      <div class="detail-value">{{ formatFullDate(ticket.eventEndDate) }}</div>
+                    </div>
+                  </div>
+
+                  <div class="detail-card">
+                    <div class="detail-icon bg-danger">
+                      <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <div class="detail-content">
+                      <div class="detail-label">Venue</div>
+                      <div class="detail-value">{{ ticket.locationName }}</div>
+                      <div class="detail-address">{{ ticket.locationAddress }}, {{ ticket.locationCity }}</div>
+                    </div>
+                  </div>
+
+                  <div class="detail-card">
+                    <div class="detail-icon bg-warning">
+                      <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="detail-content">
+                      <div class="detail-label">Number of Attendees</div>
+                      <div class="detail-value">{{ ticket.ticketCount }} person(s)</div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column - Booking & Payment Info -->
+            <div class="col-lg-4">
+
+              <!-- Booking Summary -->
+              <div class="summary-card">
+                <h5><i class="bi bi-receipt me-2"></i>Booking Summary</h5>
+
+                <div class="summary-item">
+                  <span class="summary-label">Booking Date</span>
+                  <span class="summary-value">{{ formatFullDate(ticket.bookingDate) }}</span>
+                </div>
+
+                <div class="summary-item">
+                  <span class="summary-label">Ticket Count</span>
+                  <span class="summary-value">{{ ticket.ticketCount }}</span>
+                </div>
+
+                <div class="summary-item" *ngIf="ticket.isEventPaid">
+                  <span class="summary-label">Price per Ticket</span>
+                  <span class="summary-value"> ₹{{ ticket.eventPrice }}</span>
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-total">
+                  <span class="total-label">Total Amount</span>
+                  <span class="total-value" *ngIf="ticket.isEventPaid"> ₹{{ getTotalAmount() }}</span>
+                  <span class="total-value free" *ngIf="!ticket.isEventPaid">FREE</span>
+                </div>
+              </div>
+
+              <!-- Attendee Information -->
+              <div class="attendee-card">
+                <h5><i class="bi bi-person-check me-2"></i>Attendee Information</h5>
+
+                <div class="attendee-info">
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="bi bi-person"></i>
+                    </div>
+                    <div class="info-content">
+                      <div class="info-label">Full Name</div>
+                      <div class="info-value">{{ ticket.userName }}</div>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="bi bi-envelope"></i>
+                    </div>
+                    <div class="info-content">
+                      <div class="info-label">Email Address</div>
+                      <div class="info-value">{{ ticket.userEmail }}</div>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="bi bi-telephone"></i>
+                    </div>
+                    <div class="info-content">
+                      <div class="info-label">Contact Number</div>
+                      <div class="info-value">{{ ticket.userContactNumber }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status Information -->
+              <div class="status-card" [ngClass]="getStatusClass()">
+                <div class="status-content">
+                  <div class="status-icon">
+                    <i [class]="getStatusIcon()"></i>
+                  </div>
+                  <div class="status-info">
+                    <div class="status-title">Booking {{ ticket.status }}</div>
+                    <div class="status-description" *ngIf="ticket.status === 'Confirmed'">
+                      Your booking is confirmed. Please arrive 30 minutes early.
+                    </div>
+                    <div class="status-description" *ngIf="ticket.status === 'Cancelled'">
+                      This booking has been cancelled. Refund will be processed if applicable.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Important Information -->
+      <div class="info-section">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="info-card">
+              <h6><i class="bi bi-exclamation-circle me-2"></i>Important Guidelines</h6>
+              <ul class="guideline-list">
+                <li>Arrive at the venue 30 minutes before event start time</li>
+                <li>Carry a valid photo ID for verification</li>
+                <li>Follow the venue's dress code and guidelines</li>
+                <li>No outside food or beverages allowed</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="info-card">
+              <h6><i class="bi bi-telephone me-2"></i>Need Help?</h6>
+              <div class="contact-info">
+                <p><strong>Customer Support:</strong></p>
+                <p><i class="bi bi-envelope me-2"></i>supporteventhub.com</p>
+                <p><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</p>
+                <p><i class="bi bi-clock me-2"></i>Available 24/7</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

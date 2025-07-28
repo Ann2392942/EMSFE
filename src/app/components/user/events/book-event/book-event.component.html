@@ -1,0 +1,236 @@
+<!-- src/app/components/user/events/book-event/book-event.component.html -->
+<div class="container py-4">
+  <!-- Back Button -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <button class="btn btn-outline-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Events
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="row" *ngIf="isLoading">
+    <div class="col-12">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5>Loading event details...</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="row" *ngIf="errorMessage">
+    <div class="col-12">
+      <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {{ errorMessage }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Success -->
+  <div class="row" *ngIf="bookingComplete">
+    <div class="col-12">
+      <div class="alert alert-success text-center" role="alert">
+        <i class="bi bi-check-circle fs-1 text-success mb-3"></i>
+        <h3>Booking Successful!</h3>
+        <p class="mb-3">Your tickets have been booked successfully.</p>
+        <p class="small text-muted">Redirecting to your tickets in 3 seconds...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Form -->
+  <div *ngIf="event && !isLoading && !errorMessage && !bookingComplete">
+    <div class="row">
+      <!-- Event Summary -->
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4><i class="bi bi-calendar-event me-2"></i>Event Details</h4>
+          </div>
+          <div class="card-body">
+            <h5>{{ event.name }}</h5>
+            <p class="text-muted mb-3">{{ event.description }}</p>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-calendar3 text-primary me-3"></i>
+                  <div>
+                    <div class="fw-semibold">{{ formatDate(event.startDate) }}</div>
+                    <small class="text-muted">{{ formatTime(event.startDate) }} - {{ formatTime(event.endDate) }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-geo-alt text-danger me-3"></i>
+                  <div>
+                    <div class="fw-semibold">{{ location?.locationName }}</div>
+                    <small class="text-muted">{{ location?.city }}, {{ location?.state }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ticket Selection -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5><i class="bi bi-ticket-perforated me-2"></i>Select Tickets</h5>
+          </div>
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <label for="ticketCount" class="form-label">Number of Tickets</label>
+                <!-- FIXED: Use the method instead of Math -->
+                <select
+                  class="form-select"
+                  id="ticketCount"
+                  [(ngModel)]="ticketCount">
+                  <option [value]="option" *ngFor="let option of getTicketOptions()">
+                    {{ option }} Ticket{{ option > 1 ? 's' : '' }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <div class="text-end">
+                  <div class="h5 mb-1">
+                    <span *ngIf="!event.isPrice" class="text-success">FREE</span>
+                    <span *ngIf="event.isPrice">₹{{ getTotalPrice() }}</span>
+                  </div>
+                  <small class="text-muted">
+                    {{ getAvailableSpots() }} spots available
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Form (Only for paid events) -->
+        <div class="card" *ngIf="event.isPrice">
+          <div class="card-header">
+            <h5><i class="bi bi-credit-card me-2"></i>Payment Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12 mb-3">
+                <label for="cardName" class="form-label">Cardholder Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="cardName"
+                  [(ngModel)]="cardName"
+                  placeholder="John Doe">
+              </div>
+
+              <div class="col-12 mb-3">
+                <label for="cardNumber" class="form-label">Card Number</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="cardNumber"
+                  [(ngModel)]="cardNumber"
+                  placeholder="1234 5678 9012 3456"
+                  maxlength="16">
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="expiryDate" class="form-label">Expiry Date</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="expiryDate"
+                  [(ngModel)]="expiryDate"
+                  placeholder="MM/YY"
+                  maxlength="5">
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="cvv" class="form-label">CVV</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="cvv"
+                  [(ngModel)]="cvv"
+                  placeholder="123"
+                  maxlength="3">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Summary -->
+      <div class="col-lg-4">
+        <div class="card sticky-top" style="top: 2rem;">
+          <div class="card-header">
+            <h5><i class="bi bi-receipt me-2"></i>Booking Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Event:</span>
+              <span class="fw-semibold">{{ event.name }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-2">
+              <span>Tickets:</span>
+              <span>{{ ticketCount }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-2" *ngIf="event.isPrice">
+              <span>Price per ticket:</span>
+              <span>₹{{ event.price }}</span>
+            </div>
+
+            <hr>
+
+            <div class="d-flex justify-content-between mb-4">
+              <span class="fw-bold">Total:</span>
+              <span class="fw-bold h5">
+                <span *ngIf="!event.isPrice" class="text-success">FREE</span>
+                <span *ngIf="event.isPrice">₹{{ getTotalPrice() }}</span>
+              </span>
+            </div>
+
+            <!-- Book Button -->
+            <div class="d-grid">
+              <button
+                class="btn btn-primary btn-lg"
+                (click)="processPayment()"
+                [disabled]="!canBook() || isBooking || (event.isPrice && (!cardName || !cardNumber || !expiryDate || !cvv))">
+
+                <span *ngIf="!isBooking">
+                  <i class="bi bi-credit-card me-2"></i>
+                  {{ event.isPrice ? 'Pay & Book' : 'Book Free Event' }}
+                </span>
+
+                <span *ngIf="isBooking">
+                  <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                  Processing...
+                </span>
+              </button>
+            </div>
+
+            <!-- Security Note -->
+            <div class="mt-3" *ngIf="event.isPrice">
+              <small class="text-muted">
+                <i class="bi bi-shield-check me-1"></i>
+                This is a demo payment. No real charges will be made.
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

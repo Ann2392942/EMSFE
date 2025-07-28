@@ -1,0 +1,161 @@
+<!-- src/app/components/user/user.component.html -->
+<div class="user-layout">
+  <!-- Header -->
+  <header class="user-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="sidebar-toggle" (click)="toggleSidebar()">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="brand">
+          <i class="bi bi-calendar-event me-2"></i>
+          <span>EventHub</span>
+        </div>
+      </div>
+
+      <!-- <div class="header-center d-none d-md-block">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Search events...">
+        </div>
+      </div> -->
+
+      <div class="header-right">
+        <!-- Notification Dropdown -->
+        <div class="notification-dropdown position-relative">
+          <button class="notification-btn" (click)="toggleNotificationDropdown()">
+            <i class="bi bi-bell"></i>
+            <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+          </button>
+
+          <!-- Notification Dropdown Menu -->
+          <div class="notification-menu" *ngIf="showNotificationDropdown">
+            <div class="notification-header">
+              <h6 class="mb-0">Notifications</h6>
+              <span class="badge bg-primary rounded-pill" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            </div>
+
+            <div class="notification-body">
+              <!-- Loading State -->
+              <div class="notification-loading" *ngIf="loadingNotifications">
+                <div class="text-center py-3">
+                  <div class="spinner-border spinner-border-sm text-primary"></div>
+                  <p class="mb-0 mt-2 text-muted small">Loading...</p>
+                </div>
+              </div>
+
+              <!-- Notifications List -->
+              <div class="notification-list" *ngIf="!loadingNotifications">
+                <div class="notification-item" *ngFor="let notification of notifications">
+                  <div class="notification-icon">
+                    <i [class]="getNotificationIcon(notification.message)"></i>
+                  </div>
+                  <div class="notification-content">
+                    <p class="notification-text">{{ notification.message }}</p>
+                    <small class="notification-time">{{ formatNotificationTime(notification.sentTimestamp) }}</small>
+                  </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="notification-empty" *ngIf="notifications.length === 0">
+                  <div class="text-center py-4">
+                    <i class="bi bi-bell-slash text-muted mb-2" style="font-size: 2rem;"></i>
+                    <p class="text-muted mb-0">No notifications yet</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="notification-footer">
+              <button class="btn btn-primary btn-sm w-100" (click)="viewAllNotifications()">
+                View All Notifications
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile -->
+        <div class="user-profile">
+          <div class="user-avatar">
+            <i class="bi bi-person-circle"></i>
+          </div>
+          <div class="user-info d-none d-lg-block">
+            <div class="user-name">{{ currentUser?.name || currentUser?.email?.split('@')[0] || 'User' }}</div>
+            <div class="user-role">Member</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="user-sidebar" [class.collapsed]="isSidebarCollapsed">
+    <div class="sidebar-content">
+      <!-- Welcome Card -->
+      <div class="welcome-card" *ngIf="!isSidebarCollapsed">
+        <div class="welcome-content">
+          <h5>Welcome back!</h5>
+          <p>{{ currentUser?.name || currentUser?.email?.split('@')[0] || 'User' }}</p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li class="nav-item" *ngFor="let item of menuItems">
+            <a class="nav-link"
+               [class.active]="selectedItem === item.key"
+               (click)="selectItem(item.key)"
+               [title]="isSidebarCollapsed ? item.title : ''">
+              <div class="nav-icon">
+                <i [class]="item.icon"></i>
+                <!-- Show notification badge on nav item -->
+                <span class="nav-notification-badge" *ngIf="item.key === 'notifications' && unreadCount > 0">
+                  {{ unreadCount > 9 ? '9+' : unreadCount }}
+                </span>
+              </div>
+              <span class="nav-text" *ngIf="!isSidebarCollapsed">{{ item.title }}</span>
+              <div class="nav-indicator" *ngIf="selectedItem === item.key"></div>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Quick Stats -->
+      <div class="quick-stats" *ngIf="!isSidebarCollapsed">
+        <div class="stat-item">
+          <i class="bi bi-calendar-check text-success"></i>
+          <div class="stat-content">
+            <div class="stat-value">5</div>
+            <div class="stat-label">Booked Events</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <i class="bi bi-bell text-primary"></i>
+          <div class="stat-content">
+            <div class="stat-value">{{ unreadCount }}</div>
+            <div class="stat-label">Notifications</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logout -->
+      <div class="sidebar-footer">
+        <button class="logout-btn" (click)="logout()" *ngIf="!isSidebarCollapsed">
+          <i class="bi bi-box-arrow-right me-2"></i>
+          Logout
+        </button>
+        <button class="logout-btn-small" (click)="logout()" *ngIf="isSidebarCollapsed" title="Logout">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

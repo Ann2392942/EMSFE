@@ -1,0 +1,238 @@
+<!-- src/app/components/user/tickets/tickets.component.html -->
+<div class="container py-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-primary text-white">
+        <div class="card-body text-center py-4">
+          <h1><i class="bi bi-ticket-perforated me-2"></i>My Tickets</h1>
+          <p class="mb-0">View and manage your event tickets</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Summary -->
+  <div class="row mb-4" *ngIf="tickets.length > 0 && !loading">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-md-4 mb-3 mb-md-0">
+              <div class="summary-item">
+                <div class="summary-icon bg-success">
+                  <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="summary-content">
+                  <div class="summary-value">{{ getTicketsSummary().confirmed }}</div>
+                  <div class="summary-label">Confirmed Tickets</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+              <div class="summary-item">
+                <div class="summary-icon bg-danger">
+                  <i class="bi bi-x-circle"></i>
+                </div>
+                <div class="summary-content">
+                  <div class="summary-value">{{ getTicketsSummary().cancelled }}</div>
+                  <div class="summary-label">Cancelled Tickets</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="summary-item">
+                <div class="summary-icon bg-primary">
+                  <i class="bi bi-currency-rupee"></i>
+                </div>
+                <div class="summary-content">
+                  <div class="summary-value"> ₹{{ getTicketsSummary().totalSpent }}</div>
+                  <div class="summary-label">Total Spent</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              class="btn btn-outline-primary"
+              [class.btn-primary]="selectedFilter === 'all'"
+              [class.text-white]="selectedFilter === 'all'"
+              (click)="setFilter('all')">
+              <i class="bi bi-list me-1"></i>All Tickets
+            </button>
+            <button
+              class="btn btn-outline-success"
+              [class.btn-success]="selectedFilter === 'confirmed'"
+              [class.text-white]="selectedFilter === 'confirmed'"
+              (click)="setFilter('confirmed')">
+              <i class="bi bi-check-circle me-1"></i>Confirmed
+            </button>
+            <button
+              class="btn btn-outline-danger"
+              [class.btn-danger]="selectedFilter === 'cancelled'"
+              [class.text-white]="selectedFilter === 'cancelled'"
+              (click)="setFilter('cancelled')">
+              <i class="bi bi-x-circle me-1"></i>Cancelled
+            </button>
+            <button
+              class="btn btn-outline-info"
+              [class.btn-info]="selectedFilter === 'upcoming'"
+              [class.text-white]="selectedFilter === 'upcoming'"
+              (click)="setFilter('upcoming')">
+              <i class="bi bi-calendar-plus me-1"></i>Upcoming
+            </button>
+            <button
+              class="btn btn-outline-warning"
+              [class.btn-warning]="selectedFilter === 'past'"
+              [class.text-white]="selectedFilter === 'past'"
+              (click)="setFilter('past')">
+              <i class="bi bi-calendar-x me-1"></i>Past Events
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="row" *ngIf="loading">
+    <div class="col-12">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary mb-3"></div>
+        <h5>Loading your tickets...</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="row" *ngIf="error">
+    <div class="col-12">
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+        <button class="btn btn-outline-danger btn-sm ms-3" (click)="loadTickets()">
+          Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tickets List -->
+  <div class="row" *ngIf="!loading && !error">
+    <!-- Results Count -->
+    <div class="col-12 mb-3" *ngIf="filteredTickets.length > 0">
+      <p class="text-muted">
+        <i class="bi bi-ticket me-2"></i>
+        {{ filteredTickets.length }} ticket(s) found
+      </p>
+    </div>
+
+    <!-- Empty State -->
+  <button class="btn btn-primary" (click)="browseEvents()">
+  <i class="bi bi-calendar-event me-2"></i>
+  Browse Events
+</button>
+
+
+    <!-- Ticket Cards -->
+    <div class="col-lg-6 mb-4" *ngFor="let ticket of filteredTickets">
+      <div class="ticket-card" [ngClass]="getStatusClass(ticket.status)">
+        <!-- Ticket Header -->
+        <div class="ticket-header">
+          <div class="ticket-status">
+            <i [class]="getStatusIcon(ticket.status)"></i>
+            <span class="status-text">{{ ticket.status }}</span>
+          </div>
+          <!-- <div class="ticket-id">
+            <small>Ticket #{{ ticket.ticketID }}</small>
+          </div> -->
+        </div>
+
+        <!-- Ticket Body -->
+        <div class="ticket-body">
+          <div class="event-info">
+            <h5 class="event-name">{{ ticket.eventName }}</h5>
+            <p class="event-category">
+              <i class="bi bi-tag me-1"></i>
+              {{ ticket.categoryName }}
+            </p>
+          </div>
+
+          <div class="event-details">
+            <div class="detail-item">
+              <i class="bi bi-calendar3 text-primary"></i>
+              <div class="detail-content">
+                <div class="detail-label">Event Date</div>
+                <div class="detail-value">{{ formatDateTime(ticket.eventStartDate) }}</div>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <i class="bi bi-geo-alt text-danger"></i>
+              <div class="detail-content">
+                <div class="detail-label">Location</div>
+                <div class="detail-value">{{ ticket.locationName }}, {{ ticket.locationCity }}</div>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <i class="bi bi-people text-success"></i>
+              <div class="detail-content">
+                <div class="detail-label">Tickets</div>
+                <div class="detail-value">{{ ticket.ticketCount }} person(s)</div>
+              </div>
+            </div>
+
+            <div class="detail-item" *ngIf="ticket.isEventPaid">
+              <i class="bi bi-currency-rupee text-warning"></i>
+              <div class="detail-content">
+                <div class="detail-label">Total Amount</div>
+                <div class="detail-value">${{ getTotalAmount(ticket) }}</div>
+              </div>
+            </div>
+
+            <div class="detail-item" *ngIf="!ticket.isEventPaid">
+              <i class="bi bi-gift text-info"></i>
+              <div class="detail-content">
+                <div class="detail-label">Event Type</div>
+                <div class="detail-value">Free Event</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-info">
+            <small class="text-muted">
+              <i class="bi bi-clock me-1"></i>
+              Booked on {{ formatDate(ticket.bookingDate) }}
+            </small>
+          </div>
+        </div>
+
+        <!-- Ticket Footer -->
+        <div class="ticket-footer">
+          <button class="btn btn-outline-primary btn-sm" (click)="viewTicket(ticket.ticketID)">
+            <i class="bi bi-eye me-2"></i>
+            View Details
+          </button>
+          <!-- <div class="ticket-actions">
+            <button class="btn btn-sm btn-outline-secondary" title="Download">
+              <i class="bi bi-download"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" title="Share">
+              <i class="bi bi-share"></i>
+            </button>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

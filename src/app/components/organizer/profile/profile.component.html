@@ -1,0 +1,215 @@
+<!-- src/app/components/organizer/profile/profile.component.html -->
+<div class="container py-4">
+  <!-- Page Title -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-success text-white">
+        <div class="card-body text-center py-4">
+          <h1><i class="bi bi-person-badge me-2"></i>My Profile</h1>
+          <p class="mb-0">Manage your organizer account</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="row" *ngIf="loading">
+    <div class="col-12">
+      <div class="text-center py-5">
+        <div class="spinner-border text-success mb-3"></div>
+        <h5>Loading your profile...</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="row" *ngIf="message">
+    <div class="col-12">
+      <div class="alert alert-success alert-dismissible">
+        <i class="bi bi-check-circle me-2"></i>{{ message }}
+        <button class="btn-close" (click)="message = ''"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="row" *ngIf="error && !loading">
+    <div class="col-12">
+      <div class="alert alert-danger alert-dismissible">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+        <button class="btn-close" (click)="error = ''"></button>
+        <div class="mt-2">
+          <button class="btn btn-sm btn-outline-danger" (click)="loadProfile()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Content -->
+  <div class="row" *ngIf="organizer && !loading">
+    <div class="col-lg-8 mx-auto">
+
+      <!-- Profile Card -->
+      <div class="card shadow">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Profile Information</h4>
+          <button
+            *ngIf="!editing"
+            class="btn btn-success"
+            (click)="startEdit()">
+            <i class="bi bi-pencil me-1"></i>Edit
+          </button>
+        </div>
+
+        <div class="card-body p-4">
+          <!-- View Mode -->
+          <div *ngIf="!editing">
+            <!-- Profile Header -->
+            <div class="text-center mb-4">
+              <div class="profile-avatar mb-3">
+                <i class="bi bi-person-badge"></i>
+              </div>
+              <h3>{{ organizer.name }}</h3>
+              <span class="badge bg-success px-3 py-2">
+                {{ organizer.role | titlecase }}
+              </span>
+            </div>
+
+            <!-- Profile Details -->
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="info-box">
+                  <div class="info-icon bg-success">
+                    <i class="bi bi-person text-white"></i>
+                  </div>
+                  <div class="info-content">
+                    <label>Full Name</label>
+                    <div>{{ organizer.name }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="info-box">
+                  <div class="info-icon bg-primary">
+                    <i class="bi bi-envelope text-white"></i>
+                  </div>
+                  <div class="info-content">
+                    <label>Email</label>
+                    <div>{{ organizer.email }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="info-box">
+                  <div class="info-icon bg-warning">
+                    <i class="bi bi-telephone text-white"></i>
+                  </div>
+                  <div class="info-content">
+                    <label>Phone</label>
+                    <div>{{ formatPhone(organizer.contactNumber) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- <div class="col-md-6">
+                <div class="info-box">
+                  <div class="info-icon bg-info">
+                    <i class="bi bi-hash text-white"></i>
+                  </div>
+                  <div class="info-content">
+                    <label>Organizer ID</label>
+                    <div>#{{ organizer.userID }}</div>
+                  </div>
+                </div>
+              </div> -->
+            </div>
+          </div>
+
+          <!-- Edit Mode -->
+          <div *ngIf="editing">
+            <form (ngSubmit)="saveProfile()">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">
+                    <i class="bi bi-person me-1"></i>Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="editData.name"
+                    name="name"
+                    placeholder="Enter your full name"
+                    required>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">
+                    <i class="bi bi-telephone me-1"></i>Contact Number *
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="editData.contactNumber"
+                    name="contactNumber"
+                    placeholder="Enter your contact number"
+                    required>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">
+                    <i class="bi bi-envelope me-1"></i>Email Address
+                  </label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    [value]="organizer.email"
+                    readonly>
+                  <div class="form-text">Email cannot be changed</div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">
+                    <i class="bi bi-shield me-1"></i>Role
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [value]="organizer.role | titlecase"
+                    readonly>
+                  <div class="form-text">Role is managed by administrators</div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="d-flex gap-2 justify-content-end mt-4">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="cancelEdit()"
+                  [disabled]="saving">
+                  <i class="bi bi-x me-1"></i>Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  [disabled]="!isValid() || saving">
+                  <span *ngIf="saving">
+                    <div class="spinner-border spinner-border-sm me-1"></div>
+                    Saving...
+                  </span>
+                  <span *ngIf="!saving">
+                    <i class="bi bi-check me-1"></i>Save Changes
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

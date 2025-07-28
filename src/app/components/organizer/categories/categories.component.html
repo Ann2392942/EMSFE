@@ -1,0 +1,104 @@
+<!-- src/app/components/organizer/categories/categories.component.html -->
+<div class="categories-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Category Management</h1>
+      <p>Manage event categories for better organization</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="toggleCreateForm()">
+        <i class="fas fa-plus"></i>
+        {{ showCreateForm ? 'Cancel' : 'Add Category' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="fas fa-check-circle"></i>
+    {{ successMessage }}
+  </div>
+
+  <!-- Error Message -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    <i class="fas fa-exclamation-circle"></i>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Create/Edit Category Form -->
+  <div class="create-form-container" *ngIf="showCreateForm">
+    <div class="form-card">
+      <h3>{{ formTitle }}</h3>
+      <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="categoryName">Category Name *</label>
+          <input
+            type="text"
+            id="categoryName"
+            class="form-control"
+            [class.error]="f['categoryName'].invalid && f['categoryName'].touched"
+            formControlName="categoryName"
+            placeholder="Enter category name..."
+            maxlength="50">
+          <div class="form-errors" *ngIf="f['categoryName'].invalid && f['categoryName'].touched">
+            <span *ngIf="f['categoryName'].errors?.['required']">Category name is required</span>
+            <span *ngIf="f['categoryName'].errors?.['minlength']">Category name must be at least 2 characters</span>
+            <span *ngIf="f['categoryName'].errors?.['maxlength']">Category name cannot exceed 50 characters</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="toggleCreateForm()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || categoryForm.invalid">
+            <span *ngIf="isSubmitting" class="spinner"></span>
+            <i *ngIf="!isSubmitting" class="fas fa-save"></i>
+            {{ submitButtonText }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Categories List -->
+  <div class="categories-section">
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading categories...</p>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && categories.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-tags"></i>
+      </div>
+      <h3>No Categories Yet</h3>
+      <p>Create your first category to get started!</p>
+      <button class="btn btn-primary" (click)="toggleCreateForm()">
+        <i class="fas fa-plus"></i>
+        Create First Category
+      </button>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="categories-grid" *ngIf="!isLoading && categories.length > 0">
+      <div class="category-card" *ngFor="let category of categories; trackBy: trackByCategory">
+        <div class="category-content">
+          <h4 class="category-name">{{ category.categoryName }}</h4>
+          <!-- <div class="category-meta">
+            <span class="category-id">ID: {{ category.categoryID }}</span>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <div class="categories-summary" *ngIf="!isLoading">
+      <p>Total Categories: {{ categoryCount }}</p>
+    </div>
+  </div>
+</div>

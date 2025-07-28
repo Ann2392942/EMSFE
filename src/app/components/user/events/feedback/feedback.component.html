@@ -1,0 +1,142 @@
+<div class="feedback-section">
+  <!-- Feedback Header -->
+  <div class="feedback-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h4><i class="bi bi-chat-quote me-2"></i>Event Reviews</h4>
+      <div class="rating-summary" *ngIf="feedbacks.length > 0">
+        <div class="average-rating">
+          <span class="rating-value">{{ getAverageRating() }}</span>
+          <div class="stars">
+            <i *ngFor="let star of getDisplayStars(getAverageRating())" [class]="star"></i>
+          </div>
+          <small class="text-muted">({{ feedbacks.length }} review{{ feedbacks.length !== 1 ? 's' : '' }})</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="alert alert-success border-0" *ngIf="successMessage">
+    <i class="bi bi-check-circle me-2"></i>{{ successMessage }}
+  </div>
+
+  <!-- Error Message -->
+  <div class="alert alert-danger border-0" *ngIf="error">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+  </div>
+
+  <!-- Feedback Form -->
+  <div class="feedback-form-card mb-4" *ngIf="canGiveFeedback">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-pencil-square me-2"></i>
+          Share Your Experience
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <form (ngSubmit)="submitFeedback()">
+          <!-- Rating -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Rate this event *</label>
+            <div class="rating-input">
+              <span
+                *ngFor="let star of [1,2,3,4,5]"
+                class="star-rating"
+                [class]="getStarClass(star)"
+                (click)="setRating(star)"
+                (mouseenter)="setHoveredRating(star)"
+                (mouseleave)="clearHoveredRating()">
+              </span>
+            </div>
+            <small class="text-muted">Click to rate from 1 to 5 stars</small>
+          </div>
+
+          <!-- Comments -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Your Review *</label>
+            <textarea
+              class="form-control"
+              rows="4"
+              [(ngModel)]="feedbackForm.comments"
+              name="comments"
+              placeholder="Tell others about your experience at this event..."
+              required>
+            </textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid">
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg"
+              [disabled]="!isFormValid() || submitting">
+              <span *ngIf="submitting">
+                <div class="spinner-border spinner-border-sm me-2"></div>
+                Submitting...
+              </span>
+              <span *ngIf="!submitting">
+                <i class="bi bi-send me-2"></i>
+                Submit Review
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Not Eligible Message -->
+  <div class="alert alert-info border-0" *ngIf="!canGiveFeedback && !isEventBooked">
+    <i class="bi bi-info-circle me-2"></i>
+    You need to book this event to leave a review.
+  </div>
+
+  <div class="alert alert-warning border-0" *ngIf="!canGiveFeedback && isEventBooked">
+    <i class="bi bi-check-circle me-2"></i>
+    Thank you! You have already submitted a review for this event.
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center py-4" *ngIf="loading">
+    <div class="spinner-border text-primary mb-3"></div>
+    <p class="text-muted">Loading reviews...</p>
+  </div>
+
+  <!-- Feedback List -->
+  <div class="feedback-list" *ngIf="!loading">
+    <!-- No Feedback -->
+    <div class="no-feedback text-center py-5" *ngIf="feedbacks.length === 0">
+      <i class="bi bi-chat-quote display-1 text-muted mb-3"></i>
+      <h5 class="text-muted">No reviews yet</h5>
+      <p class="text-muted">Be the first to share your experience!</p>
+    </div>
+
+    <!-- Feedback Cards -->
+    <div class="feedback-item mb-3" *ngFor="let feedback of feedbacks">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="reviewer-info d-flex align-items-center">
+              <div class="avatar-circle me-3">
+                <i class="bi bi-person-fill"></i>
+              </div>
+              <div>
+                <h6 class="mb-1 fw-semibold">{{ feedback.userName }}</h6>
+                <small class="text-muted">{{ formatDate(feedback.submittedTimestamp) }}</small>
+              </div>
+            </div>
+            <div class="rating-display">
+              <div class="stars mb-1">
+                <i *ngFor="let star of getDisplayStars(feedback.rating)" [class]="star"></i>
+              </div>
+              <small class="text-muted">{{ feedback.rating }}/5</small>
+            </div>
+          </div>
+
+          <p class="feedback-comment mb-0">{{ feedback.comments }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

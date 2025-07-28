@@ -1,0 +1,450 @@
+<!-- src/app/components/user/events/view-event/view-event.component.html -->
+<div class="container py-4">
+  <!-- Back Button -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <button class="btn btn-outline-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Events
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="row" *ngIf="isLoading">
+    <div class="col-12">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5>Loading event details...</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="row" *ngIf="errorMessage">
+    <div class="col-12">
+      <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {{ errorMessage }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Details -->
+  <div *ngIf="event && !isLoading && !errorMessage">
+    <!-- Event Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card bg-primary text-white">
+          <div class="card-body py-5">
+            <div class="row">
+              <div class="col-lg-8">
+                <!-- Show booking status if user has booked -->
+                <div class="mb-3" *ngIf="isUserBooked">
+                  <span class="badge bg-success fs-6 px-3 py-2">
+                    <i class="bi bi-check-circle me-2"></i>
+                    You have booked this event
+                  </span>
+                </div>
+
+                <h1 class="display-5 fw-bold">{{ event.name }}</h1>
+                <p class="lead">{{ event.description }}</p>
+
+                <!-- Quick Info -->
+                <div class="row mt-4">
+                  <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-calendar3 fs-4 me-3"></i>
+                      <div>
+                        <div class="fw-semibold">{{ formatDate(event.startDate) }}</div>
+                        <small class="opacity-75">{{ formatTime(event.startDate) }} - {{ formatTime(event.endDate) }}</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-geo-alt fs-4 me-3"></i>
+                      <div>
+                        <div class="fw-semibold">{{ location?.locationName || 'Unknown' }}</div>
+                        <small class="opacity-75">{{ location?.city }}, {{ location?.state }}</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-tag fs-4 me-3"></i>
+                      <div>
+                        <div class="fw-semibold">{{ category?.categoryName || 'Unknown' }}</div>
+                        <small class="opacity-75">Category</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Details -->
+    <div class="row">
+      <div class="col-lg-8">
+        <!-- Event Information -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4><i class="bi bi-info-circle me-2"></i>Event Information</h4>
+          </div>
+          <div class="card-body">
+            <p class="lead">{{ event.description }}</p>
+          </div>
+        </div>
+
+        <!-- Location Details -->
+        <div class="card" *ngIf="location">
+          <div class="card-header">
+            <h4><i class="bi bi-geo-alt me-2"></i>Location Details</h4>
+          </div>
+          <div class="card-body">
+            <h5>{{ location.locationName }}</h5>
+            <p class="mb-2">
+              <i class="bi bi-building me-2"></i>
+              {{ location.address }}
+            </p>
+            <p class="mb-2">
+              <i class="bi bi-geo me-2"></i>
+              {{ location.city }}, {{ location.state }}
+            </p>
+            <p class="mb-0">
+              <i class="bi bi-people me-2"></i>
+              Capacity: {{ location.capacity }} people
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <!-- Booking Card -->
+        <div class="card mb-4">
+          <div class="card-header text-center">
+            <h5><i class="bi bi-ticket-perforated me-2"></i>Event Booking</h5>
+          </div>
+          <div class="card-body text-center">
+            <!-- Price -->
+            <div class="mb-4">
+              <div *ngIf="!event.isPrice" class="display-6 text-success fw-bold">FREE</div>
+              <div *ngIf="event.isPrice" class="display-6 text-primary fw-bold"> ₹{{ event.price }}</div>
+              <small class="text-muted">per person</small>
+            </div>
+
+            <!-- Availability -->
+            <div class="mb-4">
+              <h6>{{ getAvailableSpots() }} spots remaining</h6>
+              <div class="progress">
+                <div
+                  class="progress-bar bg-primary"
+                  [style.width.%]="getBookingPercentage()">
+                </div>
+              </div>
+              <small class="text-muted">{{ event.bookedCapacity }} / {{ location?.capacity || 0 }} booked ({{ getBookingPercentage() }}%)</small>
+            </div>
+
+            <!-- Book/Cancel Button Section -->
+            <div class="d-grid">
+              <!-- Show book button only if user can book -->
+              <button
+                *ngIf="canBookEvent()"
+                class="btn btn-primary btn-lg"
+                (click)="bookEvent()">
+                <i class="bi bi-ticket-perforated me-2"></i>
+                Book Now
+              </button>
+
+              <!-- Show cancel button if user has booked and event isn't completed -->
+              <button
+                *ngIf="canCancelBooking()"
+                class="btn btn-danger btn-lg"
+                [disabled]="isCancelling"
+                (click)="initiateCancelBooking()">
+                <span *ngIf="isCancelling">
+                  <div class="spinner-border spinner-border-sm me-2"></div>
+                  Cancelling...
+                </span>
+                <span *ngIf="!isCancelling">
+                  <i class="bi bi-x-circle me-2"></i>
+                  Cancel Booking
+                </span>
+              </button>
+
+              <!-- Show status button when can't book or cancel -->
+              <button
+                *ngIf="!canBookEvent() && !canCancelBooking()"
+                class="btn btn-secondary btn-lg"
+                disabled>
+                <i class="bi bi-info-circle me-2"></i>
+                {{ getBookButtonText() }}
+              </button>
+            </div>
+
+            <!-- Additional info for booked users -->
+            <div class="mt-3" *ngIf="isUserBooked">
+              <div class="alert" [class.alert-info]="canCancelBooking()" [class.alert-warning]="!canCancelBooking()">
+                <i class="bi bi-info-circle me-2"></i>
+                {{ getBookingStatusMessage() }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event Stats -->
+        <div class="card">
+          <div class="card-header">
+            <h6><i class="bi bi-bar-chart me-2"></i>Event Statistics</h6>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-6 mb-3">
+                <div class="h4 text-primary">{{ event.bookedCapacity }}</div>
+                <small class="text-muted">Attendees</small>
+              </div>
+              <div class="col-6 mb-3">
+                <div class="h4 text-success">{{ getAvailableSpots() }}</div>
+                <small class="text-muted">Available</small>
+              </div>
+              <div class="col-12">
+                <div class="h4 text-info">{{ getBookingPercentage() }}%</div>
+                <small class="text-muted">Booking Rate</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEEDBACK SECTION -->
+   <!-- UPDATED FEEDBACK SECTION - Only shows for completed events -->
+<div class="row mt-5" *ngIf="shouldShowFeedbackSection()">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h4>
+            <i class="bi bi-chat-quote me-2"></i>
+            Event Reviews
+            <span class="badge bg-success ms-2">{{ getEventStatus() }}</span>
+          </h4>
+          <div class="rating-summary" *ngIf="feedbacks.length > 0">
+            <div class="average-rating">
+              <span class="rating-value">{{ getAverageRating() }}</span>
+              <div class="stars">
+                <i *ngFor="let star of getDisplayStars(getAverageRating())" [class]="star"></i>
+              </div>
+              <small class="text-muted">({{ feedbacks.length }} review{{ feedbacks.length !== 1 ? 's' : '' }})</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body p-4">
+        <!-- Success Message -->
+        <div class="alert alert-success border-0" *ngIf="feedbackSuccess">
+          <i class="bi bi-check-circle me-2"></i>{{ feedbackSuccess }}
+        </div>
+
+        <!-- Error Message -->
+        <div class="alert alert-danger border-0" *ngIf="feedbackError">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ feedbackError }}
+        </div>
+
+        <!-- Feedback Form - Only for eligible users -->
+        <div class="feedback-form-card mb-4" *ngIf="canGiveFeedback">
+          <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-pencil-square me-2"></i>
+                Share Your Experience
+              </h5>
+            </div>
+            <div class="card-body">
+              <form (ngSubmit)="submitFeedback()">
+                <!-- Rating -->
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Rate this event *</label>
+                  <div class="rating-input">
+                    <span
+                      *ngFor="let star of [1,2,3,4,5]"
+                      class="star-rating"
+                      [class]="getStarClass(star)"
+                      (click)="setRating(star)"
+                      (mouseenter)="setHoveredRating(star)"
+                      (mouseleave)="clearHoveredRating()">
+                    </span>
+                  </div>
+                  <small class="text-muted">Click to rate from 1 to 5 stars</small>
+                </div>
+
+                <!-- Comments -->
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Your Review *</label>
+                  <textarea
+                    class="form-control"
+                    rows="4"
+                    [(ngModel)]="feedbackForm.comments"
+                    name="comments"
+                    placeholder="Tell others about your experience at this event..."
+                    required>
+                  </textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-lg"
+                    [disabled]="!isFeedbackFormValid() || submittingFeedback">
+                    <span *ngIf="submittingFeedback">
+                      <div class="spinner-border spinner-border-sm me-2"></div>
+                      Submitting...
+                    </span>
+                    <span *ngIf="!submittingFeedback">
+                      <i class="bi bi-send me-2"></i>
+                      Submit Review
+                    </span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback Eligibility Messages -->
+        <div class="alert border-0" [ngClass]="getFeedbackAlertClass()" *ngIf="!canGiveFeedback">
+          <i class="bi bi-info-circle me-2"></i>
+          {{ getFeedbackEligibilityMessage() }}
+        </div>
+
+        <!-- Loading -->
+        <div class="text-center py-4" *ngIf="loadingFeedbacks">
+          <div class="spinner-border text-primary mb-3"></div>
+          <p class="text-muted">Loading reviews...</p>
+        </div>
+
+        <!-- Feedback List -->
+        <div class="feedback-list" *ngIf="!loadingFeedbacks">
+          <!-- No Feedback -->
+          <div class="no-feedback text-center py-5" *ngIf="feedbacks.length === 0">
+            <i class="bi bi-chat-quote display-1 text-muted mb-3"></i>
+            <h5 class="text-muted">No reviews yet</h5>
+            <p class="text-muted">Be the first to share your experience!</p>
+          </div>
+
+          <!-- Feedback Cards -->
+          <div class="feedback-item mb-3" *ngFor="let feedback of feedbacks">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <div class="reviewer-info d-flex align-items-center">
+                    <div class="avatar-circle me-3">
+                      <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                      <h6 class="mb-1 fw-semibold">{{ feedback.userName }}</h6>
+                      <small class="text-muted">{{ formatFeedbackDate(feedback.submittedTimestamp) }}</small>
+                    </div>
+                  </div>
+                  <div class="rating-display">
+                    <div class="stars mb-1">
+                      <i *ngFor="let star of getDisplayStars(feedback.rating)" [class]="star"></i>
+                    </div>
+                    <small class="text-muted">{{ feedback.rating }}/5</small>
+                  </div>
+                </div>
+
+                <p class="feedback-comment mb-0">{{ feedback.comments }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Message for upcoming/ongoing events -->
+<div class="row mt-5" *ngIf="!shouldShowFeedbackSection() && event">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-clock-history display-4 text-muted mb-3"></i>
+        <h5 class="text-muted">Reviews Not Available Yet</h5>
+        <p class="text-muted mb-0">
+          Reviews will be available after this {{ getEventStatus().toLowerCase() }} event is completed.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Cancel Confirmation Modal -->
+  <div class="modal-backdrop"
+       [class.show]="showCancelConfirmation"
+       *ngIf="showCancelConfirmation"
+       (click)="closeCancelConfirmation()">
+  </div>
+
+  <div class="modal"
+       [class.show]="showCancelConfirmation"
+       [style.display]="showCancelConfirmation ? 'block' : 'none'"
+       *ngIf="showCancelConfirmation">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 text-center">
+          <div class="w-100">
+            <div class="mb-3">
+              <div class="cancel-icon">
+                <i class="bi bi-exclamation-triangle"></i>
+              </div>
+            </div>
+            <h4 class="modal-title text-danger">Cancel Booking</h4>
+          </div>
+        </div>
+
+        <div class="modal-body text-center px-4">
+          <p class="lead mb-3">Are you sure you want to cancel your booking for:</p>
+          <h5 class="text-primary mb-3">"{{ event?.name }}"</h5>
+          <p class="text-muted mb-4">
+            <i class="bi bi-calendar me-2"></i>
+            {{ formatDate(event?.startDate || '') }} at {{ formatTime(event?.startDate || '') }}
+          </p>
+          <div class="alert alert-warning border-0">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Note:</strong> This action cannot be undone. You'll need to book again if you change your mind.
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 justify-content-center pb-4">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-lg px-4 me-3"
+            (click)="closeCancelConfirmation()">
+            <i class="bi bi-arrow-left me-2"></i>
+            Keep Booking
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger btn-lg px-4"
+            (click)="confirmCancelBooking()">
+            <i class="bi bi-x-circle me-2"></i>
+            Yes, Cancel Booking
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

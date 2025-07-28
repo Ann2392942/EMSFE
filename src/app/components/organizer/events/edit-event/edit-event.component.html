@@ -1,0 +1,318 @@
+<!-- src/app/components/organizer/events/edit-event/edit-event.component.html -->
+<div class="edit-event-container">
+  <!-- Loading State -->
+  <div class="text-center py-5" *ngIf="isLoading">
+    <div class="spinner-border text-primary mb-3" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted">Loading event data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="alert alert-danger d-flex align-items-center" *ngIf="errorMessage">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ errorMessage }}
+    <button class="btn btn-outline-danger btn-sm ms-auto" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i>Go Back
+    </button>
+  </div>
+
+  <!-- Success Message -->
+  <div class="alert alert-success d-flex align-items-center" *ngIf="successMessage">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    {{ successMessage }}
+  </div>
+
+  <!-- Edit Event Form -->
+  <div *ngIf="!isLoading && event">
+    <!-- Page Header -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-start p-4">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+              <i class="bi bi-arrow-left me-1"></i>Back
+            </button>
+            <button class="btn btn-outline-info btn-sm" (click)="viewEvent()">
+              <i class="bi bi-eye me-1"></i>View Event
+            </button>
+          </div>
+          <h1 class="mb-2">
+            <i class="bi bi-pencil-square me-2"></i>Edit Event
+          </h1>
+          <p class="text-muted mb-2">Update your event information</p>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-secondary">
+              <i class="bi bi-circle-fill me-1"></i>{{ eventStatus }}
+            </span>
+            <!-- <small class="text-muted">Event ID: {{ event.eventID }}</small> -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warning for completed events -->
+    <div class="alert alert-warning d-flex align-items-center mb-4" *ngIf="isEventCompleted">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      <div>
+        <strong>This event has ended.</strong>
+        <p class="mb-0 small">You can still edit the details, but be careful with date changes as they might affect past bookings.</p>
+      </div>
+    </div>
+
+    <!-- Form Container -->
+    <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
+      <!-- Basic Information Section -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-0">
+          <h5 class="mb-0">
+            <i class="bi bi-info-circle me-2"></i>Basic Information
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <label for="name" class="form-label">Event Name *</label>
+            <input
+              type="text"
+              id="name"
+              class="form-control"
+              [class.is-invalid]="f['name'].invalid && f['name'].touched"
+              formControlName="name"
+              placeholder="Enter event name..."
+              maxlength="100">
+            <div class="invalid-feedback">
+              <div *ngIf="f['name'].errors?.['required']">Event name is required</div>
+              <div *ngIf="f['name'].errors?.['minlength']">Event name must be at least 3 characters</div>
+              <div *ngIf="f['name'].errors?.['maxlength']">Event name cannot exceed 100 characters</div>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="categoryID" class="form-label">Category *</label>
+              <select
+                id="categoryID"
+                class="form-select"
+                [class.is-invalid]="f['categoryID'].invalid && f['categoryID'].touched"
+                formControlName="categoryID">
+                <option value="0">Select a category</option>
+                <option *ngFor="let category of categories" [value]="category.categoryID">
+                  {{ category.categoryName }}
+                </option>
+              </select>
+              <div class="invalid-feedback">
+                <div *ngIf="f['categoryID'].errors?.['required'] || f['categoryID'].errors?.['min']">Please select a category</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="locationID" class="form-label">Venue *</label>
+              <select
+                id="locationID"
+                class="form-select"
+                [class.is-invalid]="f['locationID'].invalid && f['locationID'].touched"
+                formControlName="locationID">
+                <option value="0">Select a venue</option>
+                <option *ngFor="let location of locations" [value]="location.locationID">
+                  {{ location.locationName }} ({{ location.capacity | number }} capacity)
+                </option>
+              </select>
+              <div class="invalid-feedback">
+                <div *ngIf="f['locationID'].errors?.['required'] || f['locationID'].errors?.['min']">Please select a venue</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location Details -->
+          <div class="mt-3" *ngIf="selectedLocation">
+            <div class="alert alert-info">
+              <h6 class="alert-heading mb-2">
+                <i class="bi bi-building me-1"></i>{{ selectedLocation.locationName }}
+              </h6>
+              <p class="mb-1 small">
+                <i class="bi bi-geo-alt me-1"></i>{{ selectedLocation.address }}, {{ selectedLocation.city }}
+              </p>
+              <div class="d-flex gap-3 small">
+                <span>
+                  <i class="bi bi-people me-1"></i>
+                  {{ selectedLocation.capacity | number }} capacity
+                </span>
+                <span>
+                  <i class="bi bi-telephone me-1"></i>
+                  {{ selectedLocation.primaryContact }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-0">
+            <label for="description" class="form-label">Description *</label>
+            <textarea
+              id="description"
+              class="form-control"
+              [class.is-invalid]="f['description'].invalid && f['description'].touched"
+              formControlName="description"
+              placeholder="Describe your event..."
+              rows="4"
+              maxlength="1000"></textarea>
+            <div class="d-flex justify-content-between">
+              <div class="invalid-feedback">
+                <div *ngIf="f['description'].errors?.['required']">Description is required</div>
+                <div *ngIf="f['description'].errors?.['minlength']">Description must be at least 10 characters</div>
+                <div *ngIf="f['description'].errors?.['maxlength']">Description cannot exceed 1000 characters</div>
+              </div>
+              <small class="text-muted mt-1">
+                {{ f['description'].value?.length || 0 }}/1000 characters
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule Section -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-0">
+          <h5 class="mb-0">
+            <i class="bi bi-calendar-event me-2"></i>Schedule
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="startDate" class="form-label">Start Date & Time *</label>
+              <input
+                type="datetime-local"
+                id="startDate"
+                class="form-control"
+                [class.is-invalid]="(f['startDate'].invalid && f['startDate'].touched)"
+                formControlName="startDate">
+              <div class="invalid-feedback">
+                <div *ngIf="f['startDate'].errors?.['required']">Start date is required</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="endDate" class="form-label">End Date & Time *</label>
+              <input
+                type="datetime-local"
+                id="endDate"
+                class="form-control"
+                [class.is-invalid]="(f['endDate'].invalid && f['endDate'].touched) || formErrors.endDateBeforeStart || formErrors.durationTooLong"
+                formControlName="endDate">
+              <div class="invalid-feedback">
+                <div *ngIf="f['endDate'].errors?.['required']">End date is required</div>
+                <div *ngIf="formErrors.endDateBeforeStart">End date must be after start date</div>
+                <div *ngIf="formErrors.durationTooLong">Event duration cannot exceed 30 days</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Section -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-0">
+          <h5 class="mb-0">
+            <i class="bi bi-tag me-2"></i>Pricing
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="isPrice"
+              formControlName="isPrice">
+            <label class="form-check-label" for="isPrice">
+              <strong>This is a paid event</strong>
+            </label>
+          </div>
+
+          <div class="row" *ngIf="f['isPrice'].value">
+            <div class="col-md-6">
+              <label for="price" class="form-label">Ticket Price *</label>
+              <div class="input-group">
+                <span class="input-group-text"> ₹</span>
+                <input
+                  type="number"
+                  id="price"
+                  class="form-control"
+                  [class.is-invalid]="f['price'].invalid && f['price'].touched"
+                  formControlName="price"
+                  placeholder="0.00"
+                  min="0.01"
+                  max="10000"
+                  step="0.01">
+              </div>
+              <div class="invalid-feedback d-block" *ngIf="f['price'].invalid && f['price'].touched">
+                <div *ngIf="f['price'].errors?.['required']">Price is required for paid events</div>
+                <div *ngIf="f['price'].errors?.['min']">Price must be greater than 0</div>
+                <div *ngIf="f['price'].errors?.['max']">Price cannot exceed $10,000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Section -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-0">
+          <h5 class="mb-0">
+            <i class="bi bi-gear me-2"></i>Settings
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="isActive"
+              formControlName="isActive">
+            <label class="form-check-label" for="isActive">
+              <strong>Event is active/published</strong>
+              <div class="small text-muted">Uncheck to save as draft or deactivate the event</div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Information (Read-only) -->
+      <div class="card border-0 shadow-sm mb-4" *ngIf="event.bookedCapacity > 0">
+        <div class="card-header bg-transparent border-0 p-4 pb-0">
+          <h5 class="mb-0 text-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>Booking Information
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="alert alert-warning">
+            <p class="mb-2">
+              <strong>{{ event.bookedCapacity | number }}</strong> people have already booked tickets for this event.
+            </p>
+            <p class="mb-0 small">
+              Please be careful when making changes, especially to dates, pricing, or venue, as it may affect existing bookings.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
+              <i class="bi bi-x-circle me-1"></i>Cancel
+            </button>
+            <button type="button" class="btn btn-outline-info" (click)="viewEvent()">
+              <i class="bi bi-eye me-1"></i>View Event
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || eventForm.invalid">
+              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+              <i *ngIf="!isSubmitting" class="bi bi-check-circle me-1"></i>
+              {{ isSubmitting ? 'Updating Event...' : 'Update Event' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

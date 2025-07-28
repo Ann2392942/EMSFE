@@ -1,0 +1,128 @@
+/* src/app/components/organizer/locations/locations.component.css */
+
+.locations-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+}
+
+.header-content h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.header-content p {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Stats Icons */
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+}
+
+.stat-icon.total { background: #6366f1; }
+.stat-icon.average { background: #10b981; }
+.stat-icon.largest { background: #f59e0b; }
+.stat-icon.filtered { background: #8b5cf6; }
+
+/* Buttons */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
+
+.btn-primary:hover {
+  background-color: #5856eb;
+  border-color: #5856eb;
+  transform: translateY(-1px);
+}
+
+/* Location Cards */
+.location-card {
+  transition: all 0.2s ease;
+  border: 1px solid #f3f4f6 !important;
+}
+
+.location-card:hover {
+  border-color: #e5e7eb !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.capacity-display {
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.contact-info {
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+}
+
+/* Progress Bar */
+.progress {
+  background-color: #f3f4f6;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
+/* Badges */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+}
+
+/* Search Input */
+.form-control:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+}
+
+.input-group-text {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .locations-container {
+    margin: 0 16px;
+  }
+}

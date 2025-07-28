@@ -1,0 +1,41 @@
+/* Add to existing view-event.component.css */
+
+.text-purple {
+  color: #6f42c1 !important;
+}
+
+.capacity-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-left: auto;
+}
+
+.capacity-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.capacity-label {
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+
+.venue-capacity {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .venue-capacity {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+}

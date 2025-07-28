@@ -1,0 +1,124 @@
+<!-- src/app/components/user/sidenav/sidenav.component.html -->
+<aside class="sidenav" [class.collapsed]="isCollapsed">
+  <div class="sidenav-content">
+    <!-- Toggle Button -->
+    <div class="sidenav-toggle">
+      <button class="btn toggle-btn" (click)="toggleSidenav()">
+        <i [class]="isCollapsed ? 'bi bi-chevron-right' : 'bi bi-chevron-left'"></i>
+      </button>
+    </div>
+
+    <!-- User Welcome Section -->
+    <div class="user-welcome-section" *ngIf="!isCollapsed">
+      <div class="welcome-card">
+        <div class="welcome-icon">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        <div class="welcome-text">
+          <div class="welcome-message">Welcome back,</div>
+          <div class="user-name">{{ currentUser?.name || currentUser?.email?.split('@')[0] || 'User' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidenav-nav">
+      <div class="nav-section">
+        <div class="nav-section-title" *ngIf="!isCollapsed">Navigation</div>
+
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a class="nav-link"
+               [class.active]="isRouteActive('/user/events')"
+               (click)="navigateTo('/user/events')"
+               [title]="isCollapsed ? 'Browse Events' : ''">
+              <div class="nav-icon">
+                <i class="bi bi-calendar-event"></i>
+              </div>
+              <span class="nav-text" *ngIf="!isCollapsed">Browse Events</span>
+              <div class="nav-indicator" *ngIf="isRouteActive('/user/events')"></div>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link"
+               [class.active]="isRouteActive('/user/tickets')"
+               (click)="navigateTo('/user/tickets')"
+               [title]="isCollapsed ? 'My Tickets' : ''">
+              <div class="nav-icon">
+                <i class="bi bi-ticket-perforated"></i>
+              </div>
+              <span class="nav-text" *ngIf="!isCollapsed">My Tickets</span>
+              <span class="nav-badge" *ngIf="ticketCount > 0 && !isCollapsed">{{ ticketCount }}</span>
+              <div class="nav-indicator" *ngIf="isRouteActive('/user/tickets')"></div>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link"
+               [class.active]="isRouteActive('/user/profile')"
+               (click)="navigateTo('/user/profile')"
+               [title]="isCollapsed ? 'My Profile' : ''">
+              <div class="nav-icon">
+                <i class="bi bi-person-circle"></i>
+              </div>
+              <span class="nav-text" *ngIf="!isCollapsed">My Profile</span>
+              <div class="nav-indicator" *ngIf="isRouteActive('/user/profile')"></div>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link"
+               [class.active]="isRouteActive('/user/notifications')"
+               (click)="navigateTo('/user/notifications')"
+               [title]="isCollapsed ? 'Notifications' : ''">
+              <div class="nav-icon">
+                <i class="bi bi-bell"></i>
+              </div>
+              <span class="nav-text" *ngIf="!isCollapsed">Notifications</span>
+              <span class="nav-badge bg-danger" *ngIf="notificationCount > 0 && !isCollapsed">{{ notificationCount }}</span>
+              <div class="nav-indicator" *ngIf="isRouteActive('/user/notifications')"></div>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="nav-section" *ngIf="!isCollapsed">
+        <div class="nav-section-title">Quick Stats</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="bi bi-ticket-perforated"></i>
+            </div>
+            <div class="stat-info">
+              <div class="stat-number">{{ userStats.totalTickets }}</div>
+              <div class="stat-label">Tickets</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="bi bi-heart-fill"></i>
+            </div>
+            <div class="stat-info">
+              <div class="stat-number">{{ userStats.favorites }}</div>
+              <div class="stat-label">Favorites</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Logout Button -->
+    <div class="sidenav-footer">
+      <button class="btn btn-logout" (click)="logout()" *ngIf="!isCollapsed">
+        <i class="bi bi-box-arrow-right me-2"></i>
+        Logout
+      </button>
+      <button class="btn btn-logout-collapsed" (click)="logout()" *ngIf="isCollapsed" title="Logout">
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</aside>

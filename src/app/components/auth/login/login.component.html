@@ -1,0 +1,96 @@
+<!-- src/app/components/auth/login/login.component.html -->
+<div class="auth-wrapper">
+  <div class="auth-background"></div>
+  <div class="container-fluid h-100">
+    <div class="row h-100 align-items-center justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        <div class="auth-card">
+          <!-- Logo/Brand -->
+          <div class="text-center mb-4">
+            <div class="auth-logo">
+              <i class="bi bi-calendar-event"></i>
+            </div>
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle text-muted">Sign in to your account</p>
+          </div>
+
+          <!-- Error Message -->
+          <div class="alert alert-danger d-flex align-items-center" *ngIf="errorMessage">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ errorMessage }}
+          </div>
+
+          <!-- Login Form -->
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="email" class="form-label">
+                <i class="bi bi-envelope me-2"></i>Email Address
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-person"></i>
+                </span>
+                <input
+                  type="email"
+                  id="email"
+                  class="form-control"
+                  [class.is-invalid]="f['email']?.invalid && f['email']?.touched"
+                  formControlName="email"
+                  placeholder="Enter your email">
+              </div>
+              <div class="invalid-feedback" *ngIf="f['email']?.invalid && f['email']?.touched">
+                <div *ngIf="f['email']?.errors?.['required']">Email is required</div>
+                <div *ngIf="f['email']?.errors?.['email']">Please enter a valid email</div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="password" class="form-label">
+                <i class="bi bi-lock me-2"></i>Password
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-key"></i>
+                </span>
+                <input
+                  [type]="showPassword ? 'text' : 'password'"
+                  id="password"
+                  class="form-control"
+                  [class.is-invalid]="f['password']?.invalid && f['password']?.touched"
+                  formControlName="password"
+                  placeholder="Enter your password">
+                <!-- <button type="button" class="btn btn-outline-secondary" (click)="togglePasswordVisibility()">
+                  <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                </button> -->
+              </div>
+              <div class="invalid-feedback" *ngIf="f['password']?.invalid && f['password']?.touched">
+                <div *ngIf="f['password']?.errors?.['required']">Password is required</div>
+                <div *ngIf="f['password']?.errors?.['minlength']">Minimum 6 characters required</div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" [disabled]="isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!isLoading" class="bi bi-box-arrow-in-right me-2"></i>
+              {{ isLoading ? 'Signing In...' : 'Sign In' }}
+            </button>
+          </form>
+
+          <!-- Registration Links -->
+          <div class="auth-links">
+            <hr class="my-4">
+            <p class="text-center text-muted mb-3">Don't have an account?</p>
+            <div class="d-grid gap-2">
+              <button type="button" class="btn btn-outline-success" (click)="navigateToRegister()">
+                <i class="bi bi-person-plus me-2"></i>Register as User
+              </button>
+              <button type="button" class="btn btn-outline-warning" (click)="navigateToOrganizerRegister()">
+                <i class="bi bi-building me-2"></i>Register as Organizer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

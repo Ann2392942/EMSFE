@@ -1,0 +1,130 @@
+/* src/app/components/user/events/events.component.css */
+
+/* Enhanced header pattern */
+.header-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+  overflow: hidden;
+}
+
+.pattern-icon-1 {
+  position: absolute;
+  font-size: 12rem;
+  top: -4rem;
+  right: -3rem;
+  transform: rotate(15deg);
+}
+
+.pattern-icon-2 {
+  position: absolute;
+  font-size: 8rem;
+  top: 2rem;
+  left: -2rem;
+  transform: rotate(-15deg);
+}
+
+.pattern-icon-3 {
+  position: absolute;
+  font-size: 4rem;
+  bottom: 1rem;
+  right: 4rem;
+  transform: rotate(25deg);
+}
+
+.pattern-icon-4 {
+  position: absolute;
+  font-size: 6rem;
+  bottom: -1rem;
+  left: 6rem;
+  transform: rotate(-10deg);
+}
+
+/* Custom primary gradient */
+.bg-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-2px);
+}
+
+.bg-primary-subtle {
+  background-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+.text-primary {
+  color: #667eea !important;
+}
+
+.bg-gradient-light {
+  background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+/* Enhanced card animations */
+.event-card {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 20px !important;
+}
+
+.event-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Icon wrappers */
+.icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+/* Progress bar gradient */
+.progress-bar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Button enhancements */
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.rounded-pill {
+  border-radius: 50rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2.5rem;
+  }
+
+  .pattern-icon-1 {
+    font-size: 8rem;
+    top: -2rem;
+    right: -2rem;
+  }
+
+  .pattern-icon-2 {
+    font-size: 6rem;
+    top: 1rem;
+    left: -1rem;
+  }
+}
